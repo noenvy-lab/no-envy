@@ -76,6 +76,7 @@ await check("first visit shows the example, ready to split", async () => {
   expect((await text(page, "#result")).includes("Press the button"), "placeholder missing");
   expect(await page.inputValue("#total") === "2400", "total");
   expect((await text(page, "#hero-solve")) === "See the example's fair split", "the top of the page offers the example's result");
+  expect(await page.locator("#action-list li").count() === 6 && await page.locator("#action-list").isVisible() && await page.locator("#action-list-guest").isHidden() && await page.locator("#assistant-guest-note").isHidden(), "a sheet of one's own lists the assistant's six actions, and only those");
   await page.screenshot({ path: join(shots, "d-01-start.png"), fullPage: true });
 });
 
@@ -241,6 +242,9 @@ await check("a housemate fills in their own numbers from a link", async () => {
   expect(guest.total !== "4321", "the assistant changed the rent on a housemate's copy");
   expect(String(guest.sheet?.thisCopy).startsWith("This is Ben's own copy of the rent sheet:"), `reading the sheet does not say whose copy it is: ${String(guest.sheet?.thisCopy)}`);
   expect(await theirs.locator("#share-step").isHidden() && await theirs.locator("#share-hint").isHidden(), "a housemate's copy still offers links for the others");
+  // What the page says the assistant can do there is what was just seen to work: the list of six is put away.
+  expect(await theirs.locator("#action-list").isHidden() && await theirs.locator("#action-list-guest").isVisible() && await theirs.locator("#action-list-guest li").count() === 3, "a housemate's copy still lists actions that are refused there");
+  expect(await theirs.locator("#assistant-guest-note").isVisible() && (await text(theirs, "#assistant-guest-note")).includes("the page refuses them on this copy"), "a housemate's copy does not say which actions are refused");
   expect((await text(theirs, "#guest-split-note")).includes("worked out by whoever sent you this page"), "no word on who works out the split");
   // A reply has to be his own answer, not the placeholder he was sent.
   await theirs.click(".person.me .reply");

@@ -102,6 +102,7 @@ try {
   await view(ben, ".names-grid", "p05b-housemate-names-locked", 300);
   await view(ben, "#me-banner", "p06-housemate-banner-and-cards", 20);
   await view(ben, ".person.me", "p07-housemate-own-card", 20);
+  await view(ben, "#guest-split-note", "p08-housemate-split-and-assistant", 120);
   await theirs.close();
 } finally {
   await browser.close();
