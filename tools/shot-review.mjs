@@ -99,6 +99,7 @@ try {
   const theirs = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const ben = await open(theirs, benLink);
   await view(ben, "header.hero", "p05-housemate-opens-their-link", 0);
+  await view(ben, ".names-grid", "p05b-housemate-names-locked", 300);
   await view(ben, "#me-banner", "p06-housemate-banner-and-cards", 20);
   await view(ben, ".person.me", "p07-housemate-own-card", 20);
   await theirs.close();
