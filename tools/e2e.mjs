@@ -199,7 +199,32 @@ await check("a housemate fills in their own numbers from a link", async () => {
   expect((await text(theirs, "#person-title-1")) === "Ben (you)", await text(theirs, "#person-title-1"));
   // His copy has nobody else's amounts, so it does not offer a split (it would rest on placeholders) or
   // links for the others (they would carry an incomplete sheet). It says who works out the split.
-  expect(await theirs.locator("#solve-button").isHidden() && await theirs.locator("#hero-solve").isHidden(), "a housemate's copy still offers to find the split");
+  expect(await theirs.locator("#solve-button").isHidden() && await theirs.locator("#jump").isHidden(), "a housemate's copy still offers to find the split");
+  // The same rule holds for the assistant: on this copy its actions may fill in Ben's own row and nothing else.
+  await theirs.waitForFunction(() => Boolean(window.__nsweb?.engine?.top?.network), null, { timeout: 20000 });
+  const guest = await theirs.evaluate(async () => {
+    const { engine } = window.__nsweb;
+    const scope = { base: engine.top.base, network: engine.top.network.name };
+    const run = async (name, args) => {
+      const entry = engine.actions.catalog(scope).find((e) => e.name === name);
+      const plan = engine.actions.prepare({ kind: "action", action: entry.ref, arguments: args });
+      return (await engine.actions.execute(plan, () => true, "e2e"))[0].result;
+    };
+    const rooms = document.querySelectorAll("#bids .person.me input[type=number]").length;
+    return {
+      sheet: await run("get_rent_sheet", {}),
+      split: await run("find_split", {}),
+      place: await run("set_place", { total: 4321 }),
+      other: await run("set_amounts", { person: 0, amounts: Array.from({ length: rooms }, () => 1) }),
+      option: await run("set_no_rent_below_zero", { on: true }),
+      total: document.getElementById("total").value,
+    };
+  });
+  for (const [name, result] of [["find_split", guest.split], ["set_place", guest.place], ["set_amounts for someone else", guest.other], ["set_no_rent_below_zero", guest.option]]) {
+    expect(result?.ok === false && String(result.reason).startsWith("This is Ben's own copy of the rent sheet:"), `${name} on a housemate's copy: ${JSON.stringify(result).slice(0, 200)}`);
+  }
+  expect(guest.total !== "4321", "the assistant changed the rent on a housemate's copy");
+  expect(String(guest.sheet?.thisCopy).startsWith("This is Ben's own copy of the rent sheet:"), `reading the sheet does not say whose copy it is: ${String(guest.sheet?.thisCopy)}`);
   expect(await theirs.locator("#share-step").isHidden() && await theirs.locator("#share-hint").isHidden(), "a housemate's copy still offers links for the others");
   expect((await text(theirs, "#guest-split-note")).includes("worked out by whoever sent you this page"), "no word on who works out the split");
   // A reply has to be his own answer, not the placeholder he was sent.
