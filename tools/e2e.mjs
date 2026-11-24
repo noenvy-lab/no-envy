@@ -197,6 +197,11 @@ await check("a housemate fills in their own numbers from a link", async () => {
   expect(await theirs.locator("#bid-0-0").count() === 0 && await theirs.locator("#bids .person.other").count() === 3, "the other housemates' cards are not forms");
   expect(await theirs.locator("#total").isDisabled() && await theirs.locator("#people-name-0").isDisabled() && await theirs.locator("#count-plus").isDisabled(), "the set-up is locked on a housemate's copy");
   expect((await text(theirs, "#person-title-1")) === "Ben (you)", await text(theirs, "#person-title-1"));
+  // His copy has nobody else's amounts, so it does not offer a split (it would rest on placeholders) or
+  // links for the others (they would carry an incomplete sheet). It says who works out the split.
+  expect(await theirs.locator("#solve-button").isHidden() && await theirs.locator("#hero-solve").isHidden(), "a housemate's copy still offers to find the split");
+  expect(await theirs.locator("#share-step").isHidden() && await theirs.locator("#share-hint").isHidden(), "a housemate's copy still offers links for the others");
+  expect((await text(theirs, "#guest-split-note")).includes("worked out by whoever sent you this page"), "no word on who works out the split");
   // A reply has to be his own answer, not the placeholder he was sent.
   await theirs.click(".person.me .reply");
   expect((await text(theirs, "#me-status")).includes("still shows the even placeholder"), await text(theirs, "#me-status"));
