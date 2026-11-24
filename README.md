@@ -37,7 +37,7 @@ Node 22 or later. From this folder:
 
 ```shell
 npm run build      # no_envy.hocon -> no_envy.network.json, bridge files; must print no WARNING
-npm test           # 54 tests, no key and no network needed
+npm test           # 55 tests, no key and no network needed
 node vendor/agentify-website/scripts/serve_site.mjs site --port 8080   # then open the URL it prints
 node tools/e2e.mjs # 24 browser checks. Optional: it needs playwright-core (`npm i --no-save playwright-core`)
                    # and a Chromium (`NOENVY_CHROME=/path/to/chrome`); neither is a dependency of the site

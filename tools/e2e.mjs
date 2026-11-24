@@ -66,6 +66,26 @@ async function open(context, address = url) {
 
 const text = (page, selector) => page.locator(selector).innerText();
 
+// Every control of the page itself that a screen reader would announce without a name. The assistant's own
+// controls come from the official runtime and are not ours to name, so they are left out.
+const unnamedControls = (page) => page.evaluate(() => {
+  const said = (ids) => ids.split(/\s+/).map((id) => document.getElementById(id)?.textContent ?? "").join(" ").trim();
+  const nameOf = (node) => {
+    const label = (node.getAttribute("aria-label") ?? "").trim();
+    if (label) return label;
+    const by = node.getAttribute("aria-labelledby");
+    if (by && said(by)) return said(by);
+    const labels = Array.from(node.labels ?? []).map((l) => l.textContent).join(" ").trim();
+    if (labels) return labels;
+    if (node.tagName === "BUTTON") return node.textContent.trim();
+    return (node.getAttribute("title") ?? "").trim();
+  };
+  return Array.from(document.querySelectorAll("main input, main button, main select, main textarea"))
+    .filter((node) => !node.closest("#agent-app") && node.type !== "hidden")
+    .filter((node) => !nameOf(node))
+    .map((node) => node.id || node.outerHTML.slice(0, 90));
+});
+
 const desktop = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await open(desktop);
 
@@ -77,6 +97,7 @@ await check("first visit shows the example, ready to split", async () => {
   expect(await page.inputValue("#total") === "2400", "total");
   expect((await text(page, "#hero-solve")) === "See the example's fair split", "the top of the page offers the example's result");
   expect(await page.locator("#action-list li").count() === 6 && await page.locator("#action-list").isVisible() && await page.locator("#action-list-guest").isHidden() && await page.locator("#assistant-guest-note").isHidden(), "a sheet of one's own lists the assistant's six actions, and only those");
+  expect((await text(page, "#assistant-intro")).includes("through six actions the page gives it") && !(await text(page, "#assistant-intro")).includes("On this copy"), await text(page, "#assistant-intro"));
   await page.screenshot({ path: join(shots, "d-01-start.png"), fullPage: true });
 });
 
@@ -245,6 +266,11 @@ await check("a housemate fills in their own numbers from a link", async () => {
   // What the page says the assistant can do there is what was just seen to work: the list of six is put away.
   expect(await theirs.locator("#action-list").isHidden() && await theirs.locator("#action-list-guest").isVisible() && await theirs.locator("#action-list-guest li").count() === 3, "a housemate's copy still lists actions that are refused there");
   expect(await theirs.locator("#assistant-guest-note").isVisible() && (await text(theirs, "#assistant-guest-note")).includes("the page refuses them on this copy"), "a housemate's copy does not say which actions are refused");
+  // The sentence above the list has to agree with the list (a person read "six actions" right above "those three").
+  const introThere = await text(theirs, "#assistant-intro");
+  expect(introThere.includes("three of the page's six actions") && !introThere.includes("through six actions the page gives it"), `the introduction on a housemate's copy: ${introThere}`);
+  const unnamedThere = await unnamedControls(theirs);
+  expect(unnamedThere.length === 0, `controls without a name on a housemate's copy: ${unnamedThere.join(", ")}`);
   expect((await text(theirs, "#guest-split-note")).includes("worked out by whoever sent you this page"), "no word on who works out the split");
   // A reply has to be his own answer, not the placeholder he was sent.
   await theirs.click(".person.me .reply");
@@ -376,6 +402,13 @@ await check("the example's made-up amounts never become a real housemate's", asy
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const fresh = await open(context);
   expect(await fresh.getByRole("spinbutton", { name: "Total monthly rent", exact: true }).count() === 1, "the total rent box has no name for a screen reader");
+  // Not only that box: every control the page has, before and after a split is on screen.
+  let unnamed = await unnamedControls(fresh);
+  expect(unnamed.length === 0, `controls without a name for a screen reader: ${unnamed.join(", ")}`);
+  await fresh.click("#solve-button");
+  await fresh.waitForSelector("#result .card");
+  unnamed = await unnamedControls(fresh);
+  expect(unnamed.length === 0, `controls without a name once a split is shown: ${unnamed.join(", ")}`);
   await fresh.fill("#currency", "€");
   await fresh.locator("#currency").blur();
   expect(await fresh.inputValue("#bid-0-0") === "1200", "a currency sign alone leaves the example alone");
