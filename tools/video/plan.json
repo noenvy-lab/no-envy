@@ -1,0 +1,55 @@
+{
+  "comment": "The No Envy demo video (Open Agentic Web Challenge: required, under two minutes, public on YouTube). Built by the lab's shared tool: node ../codegeist/tools/video/build.mjs --plan tools/video/plan.json --raw ../work/video/raw-aw. Shots 1 and 2 are recorded by tools/video/capture.mjs; its time marks are where the captions below change. Shots 3 and 4 show the assistant and need a real model: their captions are written only after the recording exists, from what is really on screen. 'expect' and 'what' are used for the placeholder card of a trial cut (--allow-missing). Captions say what is on screen, in two lines at most.",
+  "output": "no-envy-demo.mp4",
+  "limitSeconds": 120,
+  "title": {
+    "seconds": 5,
+    "heading": "No Envy",
+    "sub": "Split the rent so nobody wants to swap rooms",
+    "lines": ["An open agentic website."]
+  },
+  "shots": [
+    {
+      "shot": 1,
+      "take": 1,
+      "captions": [
+        { "text": "An example: three housemates and three rooms that are not equal. An even split would not be fair.", "from": 0, "to": 6.3 },
+        { "text": "Each said what every room is worth to them. The page works out who gets which room and what each pays.", "from": 6.3, "to": 12.4 },
+        { "text": "Anyone can check it: in each row, the room that person got is the one they come out best on.", "from": 12.4, "to": 19.3 },
+        { "text": "With an even split, two of them would want the big room.", "from": 19.3, "to": 22.8 }
+      ]
+    },
+    {
+      "shot": 2,
+      "take": 1,
+      "captions": [
+        { "text": "For your own place, put in the names and the rent. No account: the numbers travel inside links.", "from": 0, "to": 6.3 },
+        { "text": "Each housemate gets a link of their own.", "from": 6.3, "to": 10.4 },
+        { "text": "Ben opens that link. Only Ben's own card can be filled in: the others' amounts did not travel with it.", "from": 10.4, "to": 20.4 },
+        { "text": "The reply is another link, to send back in any message.", "from": 20.4, "to": 24.3 },
+        { "text": "Opened where the sheet was started, it drops Ben's amounts in. Nothing is stored on a server of ours.", "from": 24.3, "to": 32.1 }
+      ]
+    },
+    {
+      "shot": 3,
+      "take": 1,
+      "expect": 35,
+      "what": "The assistant, run by a real model: asked in plain words, it sets up a sheet with the page's own actions, finds the split and explains it. An Undo appears for what it changed."
+    },
+    {
+      "shot": 4,
+      "take": 1,
+      "expect": 12,
+      "what": "Asked about a lease clause, it shows who it would ask (another agentic site) and waits. Nothing is contacted until the visitor allows it."
+    }
+  ],
+  "end": {
+    "seconds": 8,
+    "heading": "No Envy",
+    "sub": "An open agentic website",
+    "lines": [
+      "Other agent sites can ask its agent network for a split.",
+      "Designed and built by an AI agent (Anthropic's Claude), operated by a human entrant."
+    ]
+  }
+}

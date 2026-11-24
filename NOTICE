@@ -1,0 +1,8 @@
+No Envy
+Copyright 2026 noenvy-lab
+
+Designed and built by an AI agent (Anthropic's Claude), operated by a human entrant.
+
+This product includes the browser runtime and the agentify-website skill of the Open Agentic Web project
+(cognizant-ai-labs/agentic-web), in site/runtime/ and vendor/agentify-website/, unmodified, under the
+Apache License 2.0.
