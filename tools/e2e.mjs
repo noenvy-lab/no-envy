@@ -200,6 +200,17 @@ await check("a housemate fills in their own numbers from a link", async () => {
   // His copy has nobody else's amounts, so it does not offer a split (it would rest on placeholders) or
   // links for the others (they would carry an incomplete sheet). It says who works out the split.
   expect(await theirs.locator("#solve-button").isHidden() && await theirs.locator("#jump").isHidden(), "a housemate's copy still offers to find the split");
+  // The set-up cannot be changed on this copy. That is said before the fields, not after them, and they look it.
+  const lockedLook = await theirs.evaluate(() => {
+    const note = document.getElementById("setup-locked");
+    const total = document.getElementById("total");
+    return {
+      said: !note.hidden && Boolean(note.compareDocumentPosition(total) & Node.DOCUMENT_POSITION_FOLLOWING),
+      disabled: total.disabled,
+      border: getComputedStyle(total).borderTopStyle,
+    };
+  });
+  expect(lockedLook.said && lockedLook.disabled && lockedLook.border === "dashed", `a housemate's copy does not show its set-up as locked: ${JSON.stringify(lockedLook)}`);
   // The same rule holds for the assistant: on this copy its actions may fill in Ben's own row and nothing else.
   await theirs.waitForFunction(() => Boolean(window.__nsweb?.engine?.top?.network), null, { timeout: 20000 });
   const guest = await theirs.evaluate(async () => {
