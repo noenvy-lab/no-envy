@@ -260,9 +260,8 @@ test("same input, same output", () => {
 });
 
 // ---------------------------------------------------------------------------------------------------
-// Totals near the largest allowed (ten million). One unit is then a ten-millionth of the total, which
-// used to be the size of the solver's tolerances: nearly equal amounts were sometimes refused as having
-// no fair split (found by tools/fuzz-large.mjs on 2026-11-24).
+// Totals near the largest allowed (ten million), where one unit is a ten-millionth of the total: nearly
+// equal amounts must still get a split.
 
 // Exact, whole numbers only, no code shared with the solver: is there an envy-free list of rents with
 // no rent below zero? x[room] is a room's rent minus the lowest rent; the conditions "nobody envies"

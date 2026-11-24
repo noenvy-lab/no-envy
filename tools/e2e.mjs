@@ -222,10 +222,7 @@ await check("a housemate fills in their own numbers from a link", async () => {
   // His copy has nobody else's amounts, so it does not offer a split (it would rest on placeholders) or
   // links for the others (they would carry an incomplete sheet). It says who works out the split.
   expect(await theirs.locator("#solve-button").isHidden() && await theirs.locator("#jump").isHidden(), "a housemate's copy still offers to find the split");
-  // The set-up cannot be changed on this copy. That is said before the fields, not after them, and they look it.
-  // Every field of the set-up is asked, not one of them: the first version of this check looked at the rent
-  // alone and passed while the six name fields still looked like fields to fill in (seen on the live site in
-  // an ordinary browser by the second agent that checks this one's work, not by this check).
+  // The set-up cannot be changed on this copy: that is said before the fields, and every one of them looks it.
   const lockedLook = await theirs.evaluate(() => {
     const note = document.getElementById("setup-locked");
     const total = document.getElementById("total");
@@ -264,11 +261,10 @@ await check("a housemate fills in their own numbers from a link", async () => {
   expect(guest.total !== "4321", "the assistant changed the rent on a housemate's copy");
   expect(String(guest.sheet?.thisCopy).startsWith("This is Ben's own copy of the rent sheet:"), `reading the sheet does not say whose copy it is: ${String(guest.sheet?.thisCopy)}`);
   expect(await theirs.locator("#share-step").isHidden() && await theirs.locator("#share-hint").isHidden(), "a housemate's copy still offers links for the others");
-  // What the page says the assistant can do there is what was just seen to work: the list of six is put away.
+  // The page lists only the actions that work on this copy.
   expect(await theirs.locator("#action-list").isHidden() && await theirs.locator("#action-list-guest").isVisible() && await theirs.locator("#action-list-guest li").count() === 3, "a housemate's copy still lists actions that are refused there");
   expect(await theirs.locator("#assistant-guest-note").isVisible() && (await text(theirs, "#assistant-guest-note")).includes("the page refuses them on this copy"), "a housemate's copy does not say which actions are refused");
-  // The sentence above the list has to agree with the list ("six actions" stood right above "those three";
-  // read on the live site by the second agent, in an ordinary browser).
+  // The sentence above the list has to agree with the list.
   const introThere = await text(theirs, "#assistant-intro");
   expect(introThere.includes("three of the page's six actions") && !introThere.includes("through six actions the page gives it"), `the introduction on a housemate's copy: ${introThere}`);
   const unnamedThere = await unnamedControls(theirs);
@@ -675,7 +671,7 @@ await check("what the comparison line says about the split matches the split's o
     await tab.waitForSelector("#result .compare");
     return { verdict: await text(tab, "#result .verdict"), compare: await text(tab, "#result .compare") };
   };
-  // Whole-number rents leave one person a dollar short here (found by a survey of random sheets).
+  // Whole-number rents leave one person a dollar short here.
   const near = await show(1000, ["A", "B", "C", "D", "E", "F", "G"], [
     [155, 133, 148, 150, 144, 129, 141], [147, 149, 135, 147, 139, 144, 139], [144, 152, 132, 150, 148, 138, 136], [146, 145, 148, 145, 136, 139, 141],
     [137, 134, 149, 149, 153, 131, 147], [148, 142, 151, 129, 146, 140, 144], [150, 141, 151, 133, 148, 145, 132],

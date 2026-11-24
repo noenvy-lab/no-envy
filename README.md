@@ -25,7 +25,7 @@ the agent tests use the official runtime with a scripted model. That is an open 
 | `site/site-actions.js` | The six things the assistant can do on the page. Each calls the same code as the page's own buttons, so a rule of the page holds for the assistant as well: a housemate's own copy takes that housemate's amounts and nothing else, and there the page refuses the set-up, the option and the split to the assistant in words, as it hides them from the person (`guestRefusal` in `site/js/app.js`). Each change shows an Undo under the chat and at the top of the page (step by step, until the visitor edits the sheet by hand). |
 | `site/no_envy.hocon` | The agent network's source: `rent_guide` (front agent) and `fairness_explainer` (explains; it lists no tools of its own, and its instructions forbid the site actions that the runtime offers to every agent). |
 | `site/agent-manifest.json`, `site/no_envy.network.json`, `site/bridge/`, `site/.well-known/` | The published agent files. All but the manifest and `bridge/bridge-actions.js` are written by the build. |
-| `site/runtime/` | The browser runtime from the Open Agentic Web `agentify-website` skill, unmodified (upstream commit d67755e, 2026-11-24; all 36 files compared, apart from line endings). |
+| `site/runtime/` | The browser runtime from the Open Agentic Web `agentify-website` skill, unmodified (upstream commit d67755e). |
 | `vendor/agentify-website/` | That skill's build script, local server, partner checker and templates (Apache 2.0). |
 | `tests/`, `site/tests/`, `tools/e2e.mjs` | Unit tests, agent tests with a scripted model, and headless-browser tests. |
 | `tools/site-actions.mjs` | Lists or runs any agentic site's actions from the command line, with no model (see "For other builders"). |
@@ -97,10 +97,8 @@ node tools/site-actions.mjs site run try_split '{"total":2400,"bids":[[1200,750,
 
 It needs playwright-core and a Chromium, like the browser checks. It refuses to run an action that is not
 local to the page unless it is given `--allow-remote`, because it answers "yes" to every consent question.
-The first time it was used here it caught a wrong argument name in the example above ("amounts" for "bids"):
-the runtime refused the call before the page saw it, with `Missing arguments.bids.`
-So far it has listed the actions of two sites: this one, and Plainly's public site (its four actions with
-their arguments; listing only, nothing was run there).
+A wrong argument name, for example, shows up at once: the runtime refuses the call before the page sees it,
+with `Missing arguments.bids.`
 
 ## Called by other sites
 
@@ -134,11 +132,10 @@ the assistant can ask one partner, and only when the visitor asks:
 - **The split never depends on it.** If Plainly is down or declines, the assistant says so
   and everything else works.
 
-Checked on 2026-11-23 with
-`node vendor/agentify-website/scripts/check_partner.mjs <network URL> --origin https://example.invalid`
-(result: can be called). The tests check that the card comes first and that a decline
-fetches nothing. **What a real model does with Plainly's answer has not been tested**: that
-needs a key.
+`node vendor/agentify-website/scripts/check_partner.mjs <network URL> --origin <your origin>`
+reports whether a partner can be called. The tests check that the card comes first and that a
+decline fetches nothing. **What a real model does with Plainly's answer has not been tested**:
+that needs a key.
 
 ## Privacy
 

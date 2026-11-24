@@ -1,5 +1,5 @@
 // Large-total fuzz: does the split still pass its own check when one unit is a
-// ten-millionth of the total? Asked by the independent review of 2026-11-24.
+// ten-millionth of the total?
 // Usage: node tools/fuzz-large.mjs [cases per size, default 60] [seed, default 1]
 // Prints a table and exits with 1 if any case threw, failed the check, or was refused (or answered)
 // under "no rent below zero" against the exact whole-number answer below.

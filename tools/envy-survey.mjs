@@ -1,7 +1,6 @@
 // How far from a perfect match do whole-number rents get? Counts check.maxEnvy and the lowest gain over
 // many random sheets, to see whether the page's "a unit short" and "give or take 1" hold.
-// Usage: node tools/envy-survey.mjs [seed] [sheets]. On 2026-11-24, seed 4242 and 12000 sheets (each solved
-// with and without "no rent below zero"): 23808 perfect, 18 one unit short, none further; no gain below zero.
+// Usage: node tools/envy-survey.mjs [seed] [sheets]. Each sheet is solved with and without "no rent below zero".
 import { solve } from "../site/js/solver.js";
 
 function rng(seed) {

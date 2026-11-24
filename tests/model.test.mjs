@@ -231,7 +231,7 @@ test("a housemate's reply is taken in only on the same sheet, for the same perso
 });
 
 // ---------------------------------------------------------------------------------------------------
-// Findings of the independent review (work/reviews/2026-11-24-agenticweb-review.md)
+// Cases found by reading the code for what could go wrong
 
 test("the example's made-up amounts do not survive setting up a real place", () => {
   // The assistant's sample request: three housemates, 2400 a month. Same head count and total as the example.
