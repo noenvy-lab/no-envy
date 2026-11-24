@@ -22,7 +22,7 @@ the agent tests use the official runtime with a scripted model. That is an open 
 | Path | What it is |
 | --- | --- |
 | `site/index.html`, `site/styles.css`, `site/js/` | The page: sheet, solver (`solver.js`), rules (`model.js`), share links. Works with no assistant and no key. |
-| `site/site-actions.js` | The six things the assistant can do on the page. Each calls the same code as the page's own buttons. Each change shows an Undo under the chat and at the top of the page (step by step, until the visitor edits the sheet by hand). |
+| `site/site-actions.js` | The six things the assistant can do on the page. Each calls the same code as the page's own buttons, so a rule of the page holds for the assistant as well: a housemate's own copy takes that housemate's amounts and nothing else, and there the page refuses the set-up, the option and the split to the assistant in words, as it hides them from the person (`guestRefusal` in `site/js/app.js`). Each change shows an Undo under the chat and at the top of the page (step by step, until the visitor edits the sheet by hand). |
 | `site/no_envy.hocon` | The agent network's source: `rent_guide` (front agent) and `fairness_explainer` (explains; it lists no tools of its own, and its instructions forbid the site actions that the runtime offers to every agent). |
 | `site/agent-manifest.json`, `site/no_envy.network.json`, `site/bridge/`, `site/.well-known/` | The published agent files. All but the manifest and `bridge/bridge-actions.js` are written by the build. |
 | `site/runtime/` | The browser runtime from the Open Agentic Web `agentify-website` skill, unmodified (upstream commit d67755e, 2026-11-24; all 36 files compared, apart from line endings). |
