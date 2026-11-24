@@ -1,8 +1,10 @@
 # Designing the agent network
 
 Read this before writing the `.hocon`. The goal is a network that answers from the
-site's real data, does what the site can really do, and costs the visitor as few model
-calls as possible. The visitor pays for every call with their own key.
+site's real data, does what the site can really do, and makes as few model calls as
+possible. Every call costs money: the visitor pays with their own key, or the site pays
+when it funds the default router (see "Paying for visitors' model calls" in
+`bundle_and_hosting.md`).
 
 ## Start from the capability inventory, not from a template
 

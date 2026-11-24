@@ -42,7 +42,7 @@ editing the copy.
 | `networks[0].sample_queries` | Public metadata for people and other sites. The runtime UI does not show them. |
 | `brand` | The name in the chat header. |
 | `theme.primary` | Set inline as `--ns-primary` on the mount, so it overrides the CSS value. |
-| `llm_router.base_url`, `.byok_router`, `.mock` | Default router for BYOK. The template uses hosted Otari, `https://api.otari.ai/api/v1`, to match the model in `templates/network.hocon`. If you change one, change the other. `mock: false` for a real site. |
+| `llm_router.base_url`, `.byok_router`, `.mock` | Default router for BYOK. The template uses hosted Otari, `https://api.otari.ai/api/v1`, to match the model in `templates/network.hocon`. If you change one, change the other. `mock: false` for a real site. `publisher_funded: true` marks `base_url` as a default router the site pays for (spec §4, "Default inference"). The runtime calls it with no key and no `Authorization` header, and the panel says the site pays. When a visitor adds a key, chat switches to `byok_router`, and the visitor's key is never sent to `base_url`, by the chat or by the settings panel. Partner networks this site calls also run on `base_url`, so the site pays for their model calls too. Ignored when `mock` is true. To set one up, see "Paying for visitors' model calls". |
 | `peer_policy`, `allowed_peers` | `"mode": "closed"`. List the origin of each partner site and MCP server in `allowed_peers`: the runtime refuses every other origin that this site's network asks for. A partner's network is checked against the partner's own `allowed_peers` (`runtime/engine.js`, `_assertAllowedPeer`), so a visitor here can also get a card for a site that a partner calls. |
 | `deployment.mode` | Must be `"static"`. |
 | `actions.version`, `.module`, `.bridge`, `.agentTools` | `1`, the actions module path, `"./bridge/action-bridge.html"` (the page other agent sites load, written by the build), and the action names that become `website_*` tools. |
@@ -208,7 +208,7 @@ for one site but sends no CORS header, so other sites cannot call it.
 
 Open http://127.0.0.1:8080/, expand **⚙ AI model settings**, and paste an API key for
 the site's default provider. Or select **Connect with OpenRouter** to sign in to
-OpenRouter instead of pasting a key. For another provider, select it in the panel, which fills
+OpenRouter instead of pasting a key, or **Connect with Otari** to sign in to otari.ai. For another provider, select it in the panel, which fills
 in its provider URL and model, or enter both under **Advanced settings (optional)**. Then
 select **Save and start**. There, fill in the provider URL before the model, or type a
 setup name: the runtime names the setup from both fields when the model is typed
@@ -315,6 +315,62 @@ any script on the page can read it (spec section 4). Load no third-party scripts
 spec also asks for a restrictive Content-Security-Policy on the page. If you send one,
 allow the LLM router in `connect-src` and each partner's origin in `connect-src` and
 `frame-src`, then check the chat in a browser.
+
+## Paying for visitors' model calls
+
+By default, each visitor pays for the chat's model calls with their own key. The site can
+pay instead, so visitors chat without a key (spec section 4, "Default inference"). A
+static page cannot hide a key, so the site needs a small proxy on a server it controls,
+such as a Cloudflare Worker. The proxy holds the site's provider key. The site itself
+stays static: the proxy is a separate service. In `agent-manifest.json`:
+
+```json
+"llm_router": {
+  "base_url": "https://<your proxy>/v1",
+  "publisher_funded": true,
+  "mock": false,
+  "byok_router": "https://api.otari.ai/api/v1"
+}
+```
+
+The runtime then calls `base_url` with no key, and the first line of ⚙ AI model settings
+says the site pays. A visitor who adds their own key moves to `byok_router`, and their
+key is never sent to `base_url`. Keep `byok_router` a different URL from `base_url`,
+because the runtime sends a visitor's key to `byok_router`. The build refuses a manifest
+where they match.
+
+The proxy must:
+
+- Accept `POST <base_url>/chat/completions` in the OpenAI format, with no `Authorization`
+  header. The body has `model`, `messages` and `stream: true`, and `tools` when the agent
+  has tools. Stream the provider's reply back unchanged.
+- Add the site's key from a server secret and forward the call to the provider. Never
+  forward an `Authorization` header that comes from the browser.
+- Answer the browser's CORS preflight (`OPTIONS`) and allow the site's origin, `POST` and
+  the `Content-Type` header. Send `Access-Control-Allow-Origin` on error replies too, or
+  the chat only says that it could not connect.
+
+`GET <base_url>/models` is optional.
+
+Anyone can call the proxy, because its URL is public in `agent-manifest.json`. Checking
+the `Origin` header stops other web pages, but not scripts. So the proxy needs its own
+limits:
+
+- A hard spending cap, best also set on the provider key itself.
+- A limit per visitor, for example per IP address. A proxy on the site's own origin also
+  gets the site's cookies, so it can limit per signed-in visitor.
+- Only the models named in the network file. A partner network this site calls runs on
+  the same router with this site's front-agent model, so the site pays for it too.
+- A `max_tokens` that the proxy sets, because the runtime sends none, and a limit on the
+  size of each request.
+- When a limit is reached, a reply with a status such as 429, `Content-Type: text/plain`
+  and a short message. The chat shows that message as written, for example "Today's free
+  allowance on this site is used up. To keep going, add your own key in ⚙ AI model
+  settings."
+
+To check it, open the site in a browser with no saved key. The first line of ⚙ AI model
+settings should say "paid for by this site, no key needed", and the chat should answer.
+The proxy's log should show the calls with no `Authorization` header.
 
 ## How others find the site
 

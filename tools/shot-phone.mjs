@@ -14,7 +14,8 @@ const executablePath = process.env.NOENVY_CHROME ?? join(lab, "work", "chromium"
 const shots = process.argv[2] ?? join(lab, "work", "shots", "aw");
 await mkdir(shots, { recursive: true });
 
-const { server, url } = await startServer(join(here, "..", "site"));
+// NOENVY_URL=https://... looks at a published copy instead of serving the local folder.
+const { server, url } = process.env.NOENVY_URL ? { server: { close() {} }, url: process.env.NOENVY_URL } : await startServer(join(here, "..", "site"));
 const browser = await chromium.launch({ executablePath });
 try {
   for (const [w, h] of [[360, 740], [390, 844]]) {

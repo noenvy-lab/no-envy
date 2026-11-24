@@ -25,7 +25,7 @@ the agent tests use the official runtime with a scripted model. That is an open 
 | `site/site-actions.js` | The six things the assistant can do on the page. Each calls the same code as the page's own buttons. Each change shows an Undo under the chat and at the top of the page (step by step, until the visitor edits the sheet by hand). |
 | `site/no_envy.hocon` | The agent network's source: `rent_guide` (front agent) and `fairness_explainer` (explains; it lists no tools of its own, and its instructions forbid the site actions that the runtime offers to every agent). |
 | `site/agent-manifest.json`, `site/no_envy.network.json`, `site/bridge/`, `site/.well-known/` | The published agent files. All but the manifest and `bridge/bridge-actions.js` are written by the build. |
-| `site/runtime/` | The browser runtime from the Open Agentic Web `agentify-website` skill, unmodified (upstream commit c178171, 2026-11-22; all 35 files compared). |
+| `site/runtime/` | The browser runtime from the Open Agentic Web `agentify-website` skill, unmodified (upstream commit d67755e, 2026-11-24; all 36 files compared, apart from line endings). |
 | `vendor/agentify-website/` | That skill's build script, local server, partner checker and templates (Apache 2.0). |
 | `tests/`, `site/tests/`, `tools/e2e.mjs` | Unit tests, agent tests with a scripted model, and headless-browser tests. |
 | `tools/site-actions.mjs` | Lists or runs any agentic site's actions from the command line, with no model (see "For other builders"). |
